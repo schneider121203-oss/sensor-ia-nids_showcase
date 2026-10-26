@@ -1,46 +1,49 @@
-# Evaluation methodology
+# Metodología de evaluación
 
-## Learning protocol
+## Protocolo de aprendizaje
 
-The system follows **unsupervised novelty detection with benign-only fitting**.
-No attack label is required to fit EIF, the reconstruction Autoencoder, LOF,
-the preprocessing artifacts, or the empirical score references.
+El sistema sigue un enfoque de **novelty detection con ajuste exclusivamente
+benigno**. Ninguna etiqueta de ataque es necesaria para ajustar EIF, el
+Autoencoder de reconstrucción, LOF, los artefactos de preprocesamiento o las
+referencias empíricas de scores.
 
-The native benign flow collection was ordered chronologically and split
+La recolección nativa de flujos benignos se ordenó cronológicamente y se dividió
 70/15/15:
 
-| Partition | Flows | Purpose |
+| Partición | Flujos | Propósito |
 |---|---:|---|
-| Training | 2,520 | Fit preprocessing, detectors, and score references |
-| Validation | 540 | Calibrate the operating threshold against a predefined benign FPR target |
-| Internal benign test | 540 | Estimate benign generalization after calibration |
+| Entrenamiento | 2 520 | Ajustar preprocesamiento, detectores y referencias de scores |
+| Validación | 540 | Calibrar el umbral con un FPR benigno objetivo predefinido |
+| Prueba benigna interna | 540 | Estimar generalización benigna después de la calibración |
 
-The three normalized anomaly percentiles are combined using equal weights.
-Higher scores consistently mean greater anomaly.
+Los tres percentiles normalizados se combinan con pesos iguales. Un score más
+alto representa consistentemente una anomalía mayor.
 
-## Controlled evaluation
+## Evaluación controlada
 
-Evaluation was performed in an isolated AWS laboratory using owned systems and
-bounded commands. The locked evaluation cohort contains:
+La evaluación se realizó en un laboratorio AWS aislado, utilizando sistemas
+propios y comandos limitados. La cohorte bloqueada contiene:
 
-| Ground-truth class | Flows |
+| Clase de referencia | Flujos |
 |---|---:|
-| Attack-associated | 908 |
-| Benign | 544 |
-| Total | 1,452 |
+| Asociados a ataques | 908 |
+| Benignos | 544 |
+| Total | 1 452 |
 
-The resulting confusion matrix is `TP=867`, `FP=25`, `TN=519`, `FN=41`.
-The published metrics are derived directly from these four counts.
+La matriz resultante es `TP=867`, `FP=25`, `TN=519`, `FN=41`. Las métricas
+publicadas se derivan directamente de estos cuatro conteos.
 
-## Interpretation constraints
+## Restricciones de interpretación
 
-- Labels describe the execution in which a flow was observed; they are not
-  per-flow forensic adjudications.
-- Flows within one run are correlated observations.
-- Only one valid repetition was available for each offensive scenario.
-- The experiment measures controlled AWS behavior, not production performance.
-- Packet captures, flow datasets, and trained artifacts are withheld for
-  privacy, security, and repository-size reasons.
+- Las etiquetas describen la ejecución en la que se observó cada flujo; no son
+  adjudicaciones forenses individuales por flujo.
+- Los flujos pertenecientes a una misma corrida son observaciones correlacionadas.
+- Solo existió una repetición válida por escenario ofensivo.
+- El experimento mide comportamiento controlado en AWS, no rendimiento en
+  producción.
+- Los PCAP, datasets de flujos y artefactos entrenados no se publican por
+  privacidad, seguridad y tamaño del repositorio.
 
-Accordingly, this repository supports arithmetic verification and architectural
-review, but not complete reproduction of model training or packet-level replay.
+En consecuencia, este repositorio permite verificar los cálculos y revisar la
+arquitectura, pero no reproducir completamente el entrenamiento o el replay de
+paquetes.

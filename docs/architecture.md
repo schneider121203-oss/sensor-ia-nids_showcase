@@ -1,54 +1,54 @@
-# Architecture
+# Arquitectura
 
-## Processing path
+## Flujo de procesamiento
 
-1. **Passive acquisition** — an authorized mirrored interface or PCAP source is
-   observed without modifying network traffic.
-2. **Flow construction** — NFStream converts packets into bidirectional flow
-   records.
-3. **Feature extraction** — the sensor produces a stable 22-feature contract,
-   including direct flow values, derived rates and ratios, and explicit
-   60-second contextual counters.
-4. **Preprocessing** — categorical protocol values and numerical features are
-   transformed using training-fitted artifacts.
-5. **Independent scoring** — EIF, AE, and LOF produce anomaly scores from
-   complementary geometric perspectives.
-6. **Score normalization** — immutable empirical score distributions convert
-   raw outputs into comparable percentiles. A flow is never ranked against the
-   current live batch.
-7. **Fusion and decision** — the three percentiles are averaged with fixed equal
-   weights and compared with a threshold calibrated on benign validation data.
-8. **SIEM integration** — anomalous flows become structured JSON events consumed
-   by a Wazuh Agent and evaluated by Wazuh rules.
+1. **Adquisición pasiva** — se observa una interfaz espejada autorizada o una
+   fuente PCAP sin modificar el tráfico de red.
+2. **Construcción de flujos** — NFStream convierte paquetes en registros de
+   flujos bidireccionales.
+3. **Extracción de características** — el sensor produce un contrato estable de
+   22 características, incluyendo valores directos, tasas y razones derivadas,
+   y contadores contextuales explícitos de 60 segundos.
+4. **Preprocesamiento** — el protocolo categórico y los campos numéricos se
+   transforman mediante artefactos ajustados exclusivamente en entrenamiento.
+5. **Scoring independiente** — EIF, AE y LOF producen scores de anomalía desde
+   perspectivas geométricas complementarias.
+6. **Normalización** — distribuciones empíricas inmutables convierten los scores
+   en percentiles comparables. Un flujo nunca se ordena contra el lote que está
+   llegando en ese momento.
+7. **Fusión y decisión** — los tres percentiles se promedian con pesos iguales y
+   se comparan con un umbral calibrado sobre validación benigna.
+8. **Integración SIEM** — los flujos anómalos generan eventos JSON estructurados,
+   consumidos por un Wazuh Agent y evaluados mediante reglas de Wazuh.
 
-## Trust boundaries
+## Límites de confianza
 
 ```mermaid
 flowchart TB
-    subgraph Sensor[Sensor host]
-      Capture[Passive capture] --> Flow[NFStream flow state]
-      Flow --> Extractor[22-feature extractor]
+    subgraph Sensor[Host sensor]
+      Capture[Captura pasiva] --> Flow[Estado de flujos NFStream]
+      Flow --> Extractor[Extractor de 22 características]
       Extractor --> Models[EIF · AE · LOF]
-      Models --> Decision[Normalized ensemble decision]
-      Decision --> Log[Append-only JSON alert log]
+      Models --> Decision[Decisión normalizada del ensemble]
+      Decision --> Log[Registro JSON de alertas]
     end
 
-    subgraph SIEM[Existing SIEM]
+    subgraph SIEM[SIEM existente]
       Agent[Wazuh Agent] --> Manager[Wazuh Manager]
-      Manager --> Dashboard[Analyst dashboard]
+      Manager --> Dashboard[Dashboard del analista]
     end
 
     Log --> Agent
 ```
 
-The showcase omits operational addresses, rules, service units, certificates,
-credentials, trained artifacts, and deployment configuration.
+El showcase omite direcciones operativas, reglas, servicios systemd,
+certificados, credenciales, artefactos entrenados y configuración de despliegue.
 
-## Runtime properties
+## Propiedades de ejecución
 
-- CPU-only inference; no GPU dependency.
-- Explicit capture-interface selection.
-- Fixed feature ordering and model metadata.
-- Fixed score-reference distributions.
-- Structured event output suitable for SIEM parsing.
-- Full-flow logging is separated from alert-only forwarding.
+- Inferencia solo con CPU, sin dependencia de GPU.
+- Selección explícita de la interfaz de captura.
+- Orden fijo de características y metadatos del modelo.
+- Distribuciones de referencia de scores fijas.
+- Eventos estructurados compatibles con el análisis del SIEM.
+- Registro de todos los flujos separado del envío exclusivo de alertas.

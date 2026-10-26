@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "system_version": "v4-native",
-  "evaluation_environment": "isolated AWS laboratory",
-  "evaluation_scope": "controlled offensive scenarios and independent benign traffic",
+  "evaluation_environment": "laboratorio AWS aislado",
+  "evaluation_scope": "escenarios ofensivos controlados y tráfico benigno independiente",
   "production_evaluation": false,
-  "ground_truth_granularity": "run-level",
+  "ground_truth_granularity": "por corrida",
   "confusion_matrix": {
     "true_positive": 867,
     "false_positive": 25,

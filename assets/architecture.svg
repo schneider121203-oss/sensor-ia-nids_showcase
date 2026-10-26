@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
-  <title id="title">Sensor IA NIDS architecture</title>
-  <desc id="desc">Passive traffic is converted by NFStream into 22-feature flows, scored by EIF, Autoencoder and LOF, fused into one anomaly score and sent to Wazuh.</desc>
+  <title id="title">Arquitectura de Sensor IA NIDS</title>
+  <desc id="desc">NFStream transforma tráfico pasivo en flujos de 22 características, evaluados por EIF, Autoencoder y LOF, fusionados en un score de anomalía y enviados a Wazuh.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0b1220"/>
@@ -20,39 +20,39 @@
     </style>
   </defs>
   <rect width="1200" height="430" rx="18" fill="url(#bg)"/>
-  <text x="600" y="45" class="label" font-size="22">Flow-based anomaly detection pipeline</text>
-  <text x="600" y="70" class="sub">Passive capture · benign-only fitting · fixed score references · CPU inference</text>
+  <text x="600" y="45" class="label" font-size="22">Pipeline de detección de anomalías por flujos</text>
+  <text x="600" y="70" class="sub">Captura pasiva · ajuste benigno · referencias fijas · inferencia en CPU</text>
 
   <rect x="45" y="145" width="145" height="90" rx="12" class="box"/>
-  <text x="117" y="181" class="label">Traffic</text>
-  <text x="117" y="207" class="sub">Mirror / PCAP</text>
+  <text x="117" y="181" class="label">Tráfico</text>
+  <text x="117" y="207" class="sub">Espejo / PCAP</text>
 
   <rect x="235" y="145" width="145" height="90" rx="12" class="box"/>
   <text x="307" y="181" class="label">NFStream</text>
-  <text x="307" y="207" class="sub">Bidirectional flows</text>
+  <text x="307" y="207" class="sub">Flujos bidireccionales</text>
 
   <rect x="425" y="145" width="160" height="90" rx="12" class="box"/>
-  <text x="505" y="181" class="label">Feature contract</text>
-  <text x="505" y="207" class="sub">22 flow features</text>
+  <text x="505" y="181" class="label">Contrato</text>
+  <text x="505" y="207" class="sub">22 características</text>
 
   <rect x="640" y="100" width="135" height="66" rx="12" class="model"/>
   <text x="707" y="130" class="label">EIF</text>
-  <text x="707" y="151" class="sub">Isolation</text>
+  <text x="707" y="151" class="sub">Aislamiento</text>
   <rect x="640" y="182" width="135" height="66" rx="12" class="model"/>
   <text x="707" y="212" class="label">Autoencoder</text>
-  <text x="707" y="233" class="sub">Reconstruction</text>
+  <text x="707" y="233" class="sub">Reconstrucción</text>
   <rect x="640" y="264" width="135" height="66" rx="12" class="model"/>
   <text x="707" y="294" class="label">LOF</text>
-  <text x="707" y="315" class="sub">Local density</text>
+  <text x="707" y="315" class="sub">Densidad local</text>
 
   <rect x="835" y="145" width="145" height="90" rx="12" class="accent"/>
   <text x="907" y="177" class="label">Ensemble</text>
-  <text x="907" y="201" class="sub">Fixed ECDFs</text>
-  <text x="907" y="220" class="sub">Equal-weight fusion</text>
+  <text x="907" y="201" class="sub">ECDF fijas</text>
+  <text x="907" y="220" class="sub">Pesos iguales</text>
 
   <rect x="1030" y="145" width="125" height="90" rx="12" class="siem"/>
   <text x="1092" y="181" class="label">Wazuh</text>
-  <text x="1092" y="207" class="sub">JSON alerts</text>
+  <text x="1092" y="207" class="sub">Alertas JSON</text>
 
   <path d="M190 190 H235" class="line"/>
   <path d="M380 190 H425" class="line"/>
@@ -64,5 +64,5 @@
   <path d="M775 297 H805 V190 H835" class="line"/>
   <path d="M980 190 H1030" class="line"/>
 
-  <text x="600" y="385" class="sub">Only flows above the calibrated threshold become SIEM alerts; flow evidence remains separate.</text>
+  <text x="600" y="385" class="sub">Solo los flujos que superan el umbral generan alertas; la evidencia completa se conserva por separado.</text>
 </svg>

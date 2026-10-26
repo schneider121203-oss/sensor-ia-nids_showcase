@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Recalculate the published metrics from the disclosed confusion matrix."""
+"""Recalcula las métricas publicadas desde la matriz de confusión."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ DATA = ROOT / "data" / "metrics.json"
 
 def divide(numerator: int, denominator: int) -> float:
     if denominator == 0:
-        raise ZeroDivisionError("A metric denominator is zero")
+        raise ZeroDivisionError("El denominador de una métrica es cero")
     return numerator / denominator
 
 
@@ -43,11 +43,11 @@ def main() -> None:
         if not math.isclose(calculated, reported, rel_tol=0.0, abs_tol=1e-15):
             raise AssertionError(f"{name}: calculated={calculated}, reported={reported}")
 
-    print(f"Recall:             {metrics['recall']:.2%}")
-    print(f"Precision:          {metrics['precision']:.2%}")
-    print(f"F1-score:           {metrics['f1_score']:.2%}")
-    print(f"False-positive rate: {metrics['false_positive_rate']:.2%}")
-    print("All published metrics verified.")
+    print(f"Recall:                    {100 * metrics['recall']:.2f} %")
+    print(f"Precisión:                 {100 * metrics['precision']:.2f} %")
+    print(f"F1-score:                  {100 * metrics['f1_score']:.2f} %")
+    print(f"Tasa de falsos positivos:  {100 * metrics['false_positive_rate']:.2f} %")
+    print("Todas las métricas publicadas fueron verificadas.")
 
 
 if __name__ == "__main__":

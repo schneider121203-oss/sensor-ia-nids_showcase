@@ -1,157 +1,159 @@
 # Sensor IA NIDS
 
-**Unsupervised network-flow anomaly detection with operational SIEM integration.**
+**Detección no supervisada de anomalías en flujos de red con integración operativa en SIEM.**
 
-[![Verify metrics](https://github.com/schneider121203-oss/sensor-ia-nids_showcase/actions/workflows/verify.yml/badge.svg)](https://github.com/schneider121203-oss/sensor-ia-nids_showcase/actions/workflows/verify.yml)
+[![Verificar métricas](https://github.com/schneider121203-oss/sensor-ia-nids_showcase/actions/workflows/verify.yml/badge.svg)](https://github.com/schneider121203-oss/sensor-ia-nids_showcase/actions/workflows/verify.yml)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Learning](https://img.shields.io/badge/learning-unsupervised-39424E)
-![Runtime](https://img.shields.io/badge/runtime-CPU-555555)
+![Aprendizaje](https://img.shields.io/badge/aprendizaje-no%20supervisado-39424E)
+![Ejecución](https://img.shields.io/badge/ejecución-CPU-555555)
 
-Sensor IA NIDS is a research prototype that converts passive network traffic
-into bidirectional flows, scores each flow with three complementary
-unsupervised detectors, and forwards prioritized anomaly events to Wazuh.
+Sensor IA NIDS es un prototipo de investigación que transforma tráfico de red
+pasivo en flujos bidireccionales, evalúa cada flujo mediante tres detectores no
+supervisados complementarios y envía eventos de anomalía priorizados a Wazuh.
 
-> This repository is a technical showcase. It intentionally excludes source
-> code from the operational sensor, trained models, packet captures, datasets,
-> credentials, network identifiers, and institutional material.
+> Este repositorio es un showcase técnico. Excluye deliberadamente el código
+> fuente del sensor operativo, modelos entrenados, capturas de paquetes,
+> datasets, credenciales, identificadores de red y material institucional.
 
 <p align="center">
-  <img src="assets/architecture.svg" alt="Sensor IA NIDS architecture" width="920">
+  <img src="assets/architecture.svg" alt="Arquitectura de Sensor IA NIDS" width="920">
 </p>
 
-## Why this system exists
+## Problema abordado
 
-Rule-based monitoring is effective for known indicators, but it can miss
-unfamiliar or low-signature behavior. This system adds a flow-level anomaly
-signal that does not require attack labels during model training. The output is
-not an autonomous verdict: it is a prioritized event for analyst review in
-Wazuh.
+El monitoreo basado en reglas funciona bien ante indicadores conocidos, pero
+puede omitir comportamientos nuevos o con pocas señales. Este sistema añade una
+señal de anomalía por flujo que no requiere etiquetas de ataques durante el
+entrenamiento. Su salida no es un veredicto autónomo: es un evento priorizado
+para revisión por un analista en Wazuh.
 
-## Architecture
+## Arquitectura
 
 ```mermaid
 flowchart LR
-    A[Passive traffic] --> B[NFStream]
-    B --> C[22-feature contract]
-    C --> D[Preprocessing]
+    A[Tráfico pasivo] --> B[NFStream]
+    B --> C[Contrato de 22 características]
+    C --> D[Preprocesamiento]
     D --> E[EIF]
     D --> F[Autoencoder]
     D --> G[LOF]
-    E --> H[Fixed ECDF]
+    E --> H[ECDF fijas]
     F --> H
     G --> H
-    H --> I[Equal-weight ensemble]
-    I --> J{Calibrated threshold}
-    J -->|anomaly| K[JSON event]
+    H --> I[Ensemble de pesos iguales]
+    I --> J{Umbral calibrado}
+    J -->|anomalía| K[Evento JSON]
     K --> L[Wazuh]
 ```
 
-The detector uses:
+El detector utiliza:
 
-- **Extended Isolation Forest (EIF)** for partition-based isolation.
-- **Autoencoder (AE)** for reconstruction-error detection.
-- **Local Outlier Factor (LOF)** for local-density deviation.
-- **Fixed empirical CDFs** to map heterogeneous detector outputs to comparable
-  anomaly percentiles.
-- **Equal-weight fusion** to produce one ensemble score.
+- **Extended Isolation Forest (EIF)** para aislamiento basado en particiones.
+- **Autoencoder (AE)** para detectar errores de reconstrucción.
+- **Local Outlier Factor (LOF)** para medir desviaciones de densidad local.
+- **Funciones de distribución empírica fijas** para convertir scores
+  heterogéneos en percentiles de anomalía comparables.
+- **Fusión con pesos iguales** para producir un único score del ensemble.
 
-The implementation is designed for passive capture and CPU-only inference.
-See [architecture.md](docs/architecture.md) for the component boundaries.
+La implementación está diseñada para captura pasiva e inferencia solo con CPU.
+Consulta [arquitectura.md](docs/architecture.md) para conocer los límites entre
+componentes.
 
-## Feature contract
+## Contrato de características
 
-Each NFStream flow is represented by a fixed contract of 22 fields:
+Cada flujo de NFStream se representa mediante un contrato fijo de 22 campos:
 
-| Group | Features |
+| Grupo | Características |
 |---|---|
-| Core flow | `dur`, `proto`, `spkts`, `dpkts`, `sbytes`, `dbytes` |
-| Packet / TTL | `sttl`, `dttl`, `is_sm_ips_ports` |
-| 60-second context | `ct_dst_60s`, `ct_src_dport_60s`, `ct_dst_sport_60s`, `ct_dst_src_60s`, `ct_src_60s` |
-| Derived rates | `flow_packet_rate`, `src_load_bps`, `dst_load_bps` |
-| Derived ratios | `src_mean_packet_bytes`, `dst_mean_packet_bytes`, `bytes_ratio`, `packet_ratio`, `load_ratio` |
+| Flujo básico | `dur`, `proto`, `spkts`, `dpkts`, `sbytes`, `dbytes` |
+| Paquetes y TTL | `sttl`, `dttl`, `is_sm_ips_ports` |
+| Contexto de 60 segundos | `ct_dst_60s`, `ct_src_dport_60s`, `ct_dst_sport_60s`, `ct_dst_src_60s`, `ct_src_60s` |
+| Tasas derivadas | `flow_packet_rate`, `src_load_bps`, `dst_load_bps` |
+| Razones derivadas | `src_mean_packet_bytes`, `dst_mean_packet_bytes`, `bytes_ratio`, `packet_ratio`, `load_ratio` |
 
-The explicit contract keeps offline training and live inference aligned. The
-`ct_*` fields use time-based 60-second history rather than a global fixed count
-of recent flows.
+El contrato explícito mantiene alineados el entrenamiento fuera de línea y la
+inferencia en vivo. Los campos `ct_*` utilizan historial temporal de 60 segundos
+en lugar de un conteo global fijo de flujos recientes.
 
-## Verified AWS evaluation
+## Evaluación verificada en AWS
 
-The reported evaluation contains **1,452 flow records** from an isolated AWS
-laboratory: 908 attack-associated flows and 544 independently collected benign
-flows. Offensive activity was authorized, controlled, and directed only at
-laboratory-owned hosts.
+La evaluación publicada contiene **1 452 registros de flujo** de un laboratorio
+AWS aislado: 908 flujos asociados a ataques y 544 flujos benignos recolectados
+de manera independiente. La actividad ofensiva fue autorizada, controlada y
+dirigida exclusivamente a equipos propios del laboratorio.
 
-| Metric | Result |
+| Métrica | Resultado |
 |---|---:|
-| Recall | **95.48%** |
-| Precision | **97.20%** |
-| F1-score | **96.33%** |
-| False-positive rate | **4.60%** |
+| Recall | **95.48 %** |
+| Precisión | **97.20 %** |
+| F1-score | **96.33 %** |
+| Tasa de falsos positivos | **4.60 %** |
 
-### Confusion matrix
+### Matriz de confusión
 
-| Actual \ Predicted | Anomaly | Normal | Total |
+| Real \ Predicción | Anomalía | Normal | Total |
 |---|---:|---:|---:|
-| Attack-associated | **867** | 41 | 908 |
-| Benign | 25 | **519** | 544 |
-| Total | 892 | 560 | **1,452** |
+| Asociado a ataque | **867** | 41 | 908 |
+| Benigno | 25 | **519** | 544 |
+| Total | 892 | 560 | **1 452** |
 
-These values can be independently recalculated from the published counts:
+Los valores pueden recalcularse independientemente desde los conteos publicados:
 
 ```bash
 python3 scripts/verify_metrics.py
 ```
 
-Expected output:
+Salida esperada:
 
 ```text
-Recall:             95.48%
-Precision:          97.20%
-F1-score:           96.33%
-False-positive rate: 4.60%
-All published metrics verified.
+Recall:                    95.48 %
+Precisión:                 97.20 %
+F1-score:                  96.33 %
+Tasa de falsos positivos:   4.60 %
+Todas las métricas publicadas fueron verificadas.
 ```
 
-## Evaluation discipline
+## Disciplina experimental
 
-- The learning protocol is **novelty detection trained on benign traffic**.
-- Benign data was split chronologically into training, validation, and internal
-  testing partitions.
-- Score references were fitted from benign training data.
-- The operating threshold was calibrated using benign validation traffic.
-- Attack labels were used for retrospective evaluation, not detector training.
-- Runs were kept intact; flows from one run were not randomly distributed
-  between partitions.
+- El protocolo es **novelty detection entrenado con tráfico benigno**.
+- Los datos benignos se dividieron cronológicamente en entrenamiento,
+  validación y prueba interna.
+- Las referencias de scores se ajustaron con entrenamiento benigno.
+- El umbral operativo se calibró con tráfico benigno de validación.
+- Las etiquetas de ataques se utilizaron para evaluación retrospectiva, no para
+  entrenar los detectores.
+- Las ejecuciones se mantuvieron intactas; los flujos de una misma corrida no se
+  distribuyeron aleatoriamente entre particiones.
 
-Read the concise [methodology](docs/methodology.md) and the machine-readable
-[metrics](data/metrics.json).
+Consulta la [metodología resumida](docs/methodology.md) y las
+[métricas estructuradas](data/metrics.json).
 
-## Scope and limitations
+## Alcance y limitaciones
 
-The results above characterize controlled laboratory scenarios, including
-network reconnaissance, TCP/UDP scanning, low-rate activity, SSH authentication
-attempts, TTL variation, and combined evasion patterns. They are **not
-production results** and should not be interpreted as a deployment-wide
-detection guarantee.
+Los resultados caracterizan escenarios controlados de laboratorio, incluyendo
+reconocimiento de red, escaneo TCP/UDP, actividad de baja tasa, intentos de
+autenticación SSH, variaciones de TTL y patrones combinados de evasión. **No son
+resultados de producción** ni deben interpretarse como una garantía de detección
+para un despliegue completo.
 
-Ground truth was assigned at run level. Flows from the same execution are
-correlated, and one valid repetition was available per scenario. The raw
-traffic and trained artifacts are not public, so this showcase verifies metric
-arithmetic and documents the protocol; it does not claim full experimental
-reproduction.
+El ground truth se asignó por corrida. Los flujos de una misma ejecución están
+correlacionados y solo se dispuso de una repetición válida por escenario. El
+tráfico original y los artefactos entrenados no son públicos; por tanto, este
+showcase verifica la aritmética de las métricas y documenta el protocolo, pero
+no afirma una reproducción experimental completa.
 
-## Repository map
+## Estructura del repositorio
 
 ```text
 .
-├── assets/architecture.svg       Public system diagram
-├── data/metrics.json             Structured verified counts and metrics
-├── docs/architecture.md          Component and data-flow notes
-├── docs/methodology.md           Experimental protocol and limitations
-└── scripts/verify_metrics.py     Dependency-free metric verification
+├── assets/architecture.svg       Diagrama público del sistema
+├── data/metrics.json             Conteos y métricas verificadas
+├── docs/architecture.md          Componentes y flujo de datos
+├── docs/methodology.md           Protocolo experimental y limitaciones
+└── scripts/verify_metrics.py     Verificación sin dependencias externas
 ```
 
 ---
 
-Built as an engineering research project at the intersection of network
-security monitoring, unsupervised machine learning, and SIEM operations.
+Proyecto de ingeniería e investigación en la intersección del monitoreo de
+seguridad de redes, aprendizaje no supervisado y operaciones SIEM.
