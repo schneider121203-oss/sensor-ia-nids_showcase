@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "system_version": "v4-native",
+  "evaluation_environment": "isolated AWS laboratory",
+  "evaluation_scope": "controlled offensive scenarios and independent benign traffic",
+  "production_evaluation": false,
+  "ground_truth_granularity": "run-level",
+  "confusion_matrix": {
+    "true_positive": 867,
+    "false_positive": 25,
+    "true_negative": 519,
+    "false_negative": 41
+  },
+  "sample_counts": {
+    "attack_associated": 908,
+    "benign": 544,
+    "total": 1452
+  },
+  "reported_metrics": {
+    "recall": 0.9548458149779736,
+    "precision": 0.9719730941704036,
+    "f1_score": 0.9633333333333334,
+    "false_positive_rate": 0.04595588235294118
+  },
+  "disclosure": {
+    "raw_flows_published": false,
+    "packet_captures_published": false,
+    "trained_models_published": false,
+    "full_reproduction_claimed": false
+  }
+}
